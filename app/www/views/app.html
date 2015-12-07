@@ -1,0 +1,121 @@
+<!doctype html>
+<html ng-app="chatApp">
+	<head>
+		<title>Chad (Beta)</title>
+		<link charset="utf-8" rel="stylesheet" href="https://fonts.googleapis.com/css?family=RobotoDraft:400,500,700,400italic" />
+    	<link charset="utf-8" rel="stylesheet" type="text/css" href="bower_components/mdi/css/materialdesignicons.min.css" media="all" />
+    	<link charset="utf-8" rel="stylesheet" type="text/css" href="bower_components/angular-material/angular-material.css" media="all" />
+		<!-- <link rel="stylesheet" href="/css/terminal.theme.css"> -->
+		<link charset="utf-8" rel="stylesheet" type="text/css" href="/css/chat.theme.css" />
+		<script charset="utf-8" src="/socket.io/socket.io.js"></script>
+		<script charset="utf-8" src="/bower_components/angular/angular.js"></script>
+		<script charset="utf-8" src="/bower_components/angular-sanitize/angular-sanitize.js"></script>
+		<script charset="utf-8" src="/bower_components/moment/moment.js"></script>
+		<script charset="utf-8" src="/bower_components/moment/locale/es.js"></script>
+		<script charset="utf-8" src="/bower_components/angular-moment/angular-moment.min.js"></script>
+		<script charset="utf-8" src="/bower_components/angular-truncate/src/truncate.js"></script>
+		<script charset="utf-8" src="/bower_components/angular-animate/angular-animate.js"></script>
+		<script charset="utf-8" src="bower_components/angular-aria/angular-aria.js"></script>
+    	<script charset="utf-8" src="bower_components/angular-material/angular-material.js"></script>
+		<script charset="utf-8" src="/js/angular-dragandrop.js"></script>
+		<script charset="utf-8" src="/js/_chat.js"></script>
+	</head>
+	<body ng-controller="chatController" ng-init="init()">
+		<section id="main">
+		<!-- Panel -->
+			<div id="panel" layout="column" ng-show="logged">
+				<md-toolbar flex="83">
+
+	    		</md-toolbar>
+	    		<div layout="row" layout-align="center center">
+					<div layout="column" class="move-up md-primary" flex="66" layout-align="center center" title="Conectado, {{ dataCurrentLogin | amCalendar }}">
+
+						<div style="background-image:url({{image}});" class="main-avatar"></div>
+						<!-- <img ng-src="{{image}}" class="main-avatar" /> -->
+						<b class="md-title">{{ currentUser }}</b>
+
+					</div>
+	    		</div>
+				<md-list>
+					<h3>Users connected ({{ numUsr }}):</h3>
+					<md-list-item class="md-2-line" ng-repeat="(k, v) in users | orderBy : k " title="Conectado, {{ v.momentLogin | amCalendar }}">
+					 <div style="background-image:url({{v.avatar}});" class="md-avatar"></div>
+					 <!-- <img ng-src="{{v}}" class="md-avatar" /> -->
+						  <div class="md-list-item-text">
+							{{ v.name }}
+						</div>
+						<md-divider ng-if="!$last"></md-divider>
+					</md-list-item>
+				</md-list>
+				<md-button class="md-fab md-fab-bottom-left" ng-class="{'md-primary':sound, 'md-warn':!sound}" title="Sound" aria-label="Volume" ng-click="sound=!sound"><md-icon ng-class="{'mdi mdi-volume-high':sound, 'mdi mdi-volume-off':!sound}" style="font-size: 1.5em;" ></md-icon></md-button>
+			</div>
+			<!-- End Panel -->
+			<!-- Messages -->
+			<ul id="messages" layout="column" ng-click="focus()">
+				<p>Welcome to Git (version 1.1.1-preview)</p>
+				<p>&nbsp;</p>
+				<p>&nbsp;</p>
+				<p>Run 'git help git' to display the help index.</p>
+				<p>Run 'git help '&#60;command&#62;' to display help for especific commands. <span class="users-num">{{ numUsr }}</span></p>
+				<li ng-animate="'animate'" class="msg-li" ng-repeat="m in messages track by $index" ng-if="logged" title="{{ m.date | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}">
+					<span ng-if="!m.left && !m.join">
+						<span class="prompt-green" >{{m.user}}</span> <span class="prompt-green" >@TB65</span> <span class="prompt-yellow">/c/xampp/ </span><span class="msg-line" ng-bind-html="m.mensaje | characters:900"></span>
+						<!-- <span class="date" am-time-ago="m.date"></span> -->
+						<span class="date">{{m.date | amCalendar}}</span>
+					</span>
+
+					<span ng-class="{'prompt-left' : m.left}" ng-if="m.left">
+						<span class="skull">&#9760;</span> {{ m.user }} MURIÓ <span class="skull">&#9760;</span>
+						<span class="date" am-time-ago="m.date"></span>
+					</span>
+					<span ng-class="{'prompt-join' : m.join}" ng-if="m.join">--== {{ m.user }} SE UNIÓ ==-<span class="date" am-time-ago="m.date"></span></span>
+
+				</li>
+
+				<form ng-submit="im(form.msg)" ng-if="logged">
+					<span class="prompt-green">Global@TB65</span>
+					<span class="prompt-yellow">/c/xampp/</span>
+					<md-content layout="row" layout-wrap>
+
+						<md-input-container flex>
+							<input ng-model="form.msg" aria-label="message" autofocus id="m" autocomplete="off" />
+						</md-input-container>
+						<md-button class="md-fab md-fab-bottom md-primary" aria-label="Add"><md-icon class="mdi mdi-send" style="font-size: 1.5em;" ></md-icon></md-button>
+					</md-content>
+				</form>
+				<span class="error" ng-if="noLogged">{{ noLogged }}</span>
+			</ul>
+			<!-- End Messages -->
+			<!-- Sounds -->
+			<audio src="/sounds/blop.mp3" id="blop"></audio>
+			<audio src="/sounds/ahuuuh.mp3" id="ahu"></audio>
+			<!-- End Sounds -->
+
+		</section>
+
+		<!-- Overlay -->
+		<article class="overlay" ng-if="!logged">
+			<!-- Form Login -->
+			<form ng-submit="login(loginForm.user, $parent.image, room)" method="POST" name="loginForm">
+				<md-content layout="row" class="md-hue-1" layout-align="center center" layout-wrap>
+					<div  class="image-container dropzone" file-dropzone="[image/png, image/jpeg, image/gif]" file="$parent.image" file-name="$parent.imageFileName" data-max-file-size="3" style="background-image:url({{image}})">
+						<!-- <img ng-src={{image}} /> -->
+						<input accept="image/*" type="file" id="upload" name="upload" style="visibility: hidden; width: 1px; height: 1px" />
+					</div>
+					<md-input-container flex="10">
+						<label>Ingresa un Nickname</label>
+						<input md-maxlength="16" ng-maxlength="16" required ng-model="loginForm.user" name="userN" type="text" ng-pattern="/^[a-zA-ZáéíóúÁÉÍÓÚüÜ0-9_-]{3,16}$/" />
+						<div ng-show="loginForm.userN.$invalid" ng-messages="loginForm.userN.$invalid">
+							<div ng-show="loginForm.userN.$error.pattern" ng-message="required">Nickname no permitido </div>
+							<div ng-show="loginForm.userN.$error.required" ng-message="required"><md-icon class="mdi mdi-alert-circle md-warn" style="font-size: 2em;" ></md-icon> Nickname requerido </div>
+						</div>
+					</md-input-container>
+					<md-button type="submit" aria-label="Log" class="md-primary md-raised" ng-disabled="loginForm.$invalid" flex="10">Entrar</md-button>
+				</md-content>
+			</form>
+			<!-- End Form Login -->
+		</article>
+		<!-- End Overlay -->
+
+	</body>
+</html>
