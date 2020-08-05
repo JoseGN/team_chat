@@ -1,22 +1,20 @@
-# Team Chat
-A little chat room for team dev's comunication.
-
-### Version
-1.0.0 (Beta)
+Mi primer REPO
+# Chat Room
+A sample work with Node sockets for implement a simple messaging text chat.
 
 ### Tech
 
-This Chat uses a number of open source projects to work properly:
+Dependencies
 
 * [AngularJS]
-* [node.js]
+* [NodeJS]
 * [Express]
 * [Gulp]
 * [Socket.io]
 
 ### Installation
 
-Configure Mongo's connection in server/models/  files
+Configure Mongo's connection in server/models/ js files
 
 
 ```sh
