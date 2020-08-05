@@ -11,6 +11,7 @@ Dependencies
 * [Express]
 * [Gulp]
 * [Socket.io]
+* [MongoDB]
 
 ### Installation
 
